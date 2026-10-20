@@ -8,3 +8,4 @@ driven on a virtual desktop and captured at 1920x1080.
 | Session | Date | Task | Video |
 |---|---|---|---|
 | 1 | 2026-10-19 | httpeek issue #6 — `httpeek history` | [final-manual.mp4](https://github.com/onelpawarai-X/zyraxon-studio/releases/download/v1.0.0/final-manual.mp4) |
+| 2 | 2026-10-20 | httpeek issue #6 — `httpeek history` (full run) | [zyraxon-daily-2026-10-20.mp4](https://github.com/onelpawarai-X/zyraxon-studio/releases/download/v1.0.1/zyraxon-daily-2026-10-20.mp4) |
