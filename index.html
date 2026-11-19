@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#07070a" />
+<title>NOCTURNE — a generative light studio</title>
+<meta name="description" content="NOCTURNE is a living light studio. Paint with particles, shift the palette, and save your own generative artwork as an image." />
+<meta property="og:title" content="NOCTURNE — a generative light studio" />
+<meta property="og:description" content="Paint with light. A living particle field you can steer, colour and keep." />
+<meta property="og:type" content="website" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3CradialGradient id='g'%3E%3Cstop offset='0' stop-color='%23ffb03a'/%3E%3Cstop offset='1' stop-color='%23ff2e63'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='%2307070a'/%3E%3Ccircle cx='32' cy='32' r='16' fill='url(%23g)'/%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="aurora" aria-hidden="true">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+    <span class="blob b4"></span>
+  </div>
+
+  <canvas id="stage" aria-label="Generative light field. Move or drag your pointer to disturb the particles." role="img"></canvas>
+
+  <div class="grain" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="cursor" id="cursor" aria-hidden="true"><span></span></div>
+  <div class="rail" aria-hidden="true">
+    <span class="rail-line"></span>
+    <span class="rail-text">generative light studio</span>
+    <span class="rail-line"></span>
+  </div>
+
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Nocturne, home">
+      <span class="orb" aria-hidden="true"></span>
+      <span class="brand-name">NOCTURNE</span>
+      <span class="brand-sub">light studio</span>
+    </a>
+    <div class="topbar-right">
+      <span class="status"><i aria-hidden="true"></i><span id="statusText">live</span></span>
+      <button class="icon-btn" id="immersiveBtn" title="Immersive view (I)" aria-label="Toggle immersive view">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V5.5A1.5 1.5 0 015.5 4H9M15 4h3.5A1.5 1.5 0 0120 5.5V9M20 15v3.5a1.5 1.5 0 01-1.5 1.5H15M9 20H5.5A1.5 1.5 0 014 18.5V15"/></svg>
+      </button>
+      <button class="icon-btn" id="panelToggle" aria-expanded="true" aria-controls="panel" title="Show or hide controls">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="hero" id="hero">
+    <p class="eyebrow"><span class="rule"></span>a generative light studio</p>
+    <h1>Paint with<br /><em class="glow">light.</em></h1>
+    <p class="lede">A living field of particles that answers your hand. Drag to disturb it, shift its colour, keep what you love.</p>
+    <div class="hints">
+      <span><kbd>drag</kbd>to disturb</span>
+      <span><kbd>space</kbd>to pause</span>
+      <span><kbd>s</kbd>to save</span>
+      <span><kbd>i</kbd>immersive</span>
+    </div>
+  </main>
+
+  <aside class="panel" id="panel" aria-label="Studio controls">
+    <div class="panel-head">
+      <h2>Studio</h2>
+      <button class="icon-btn ghost" id="panelClose" title="Hide controls" aria-label="Hide controls">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+
+    <section class="group">
+      <h3>Motion</h3>
+      <div class="segmented" role="group" aria-label="Motion mode">
+        <button data-mode="flow" class="is-active" aria-pressed="true">Flow</button>
+        <button data-mode="orbits" aria-pressed="false">Orbits</button>
+        <button data-mode="silk" aria-pressed="false">Silk</button>
+      </div>
+    </section>
+
+    <section class="group">
+      <h3>Palette</h3>
+      <div class="swatches" id="swatches" role="group" aria-label="Colour palette"></div>
+    </section>
+
+    <section class="group">
+      <div class="slider-row">
+        <label for="density">Density</label>
+        <output id="densityOut">55%</output>
+      </div>
+      <input type="range" id="density" min="10" max="100" value="55" />
+      <div class="slider-row">
+        <label for="speed">Speed</label>
+        <output id="speedOut">60%</output>
+      </div>
+      <input type="range" id="speed" min="0" max="200" value="60" />
+      <div class="slider-row">
+        <label for="trail">Trail</label>
+        <output id="trailOut">88%</output>
+      </div>
+      <input type="range" id="trail" min="0" max="100" value="88" />
+    </section>
+
+    <section class="group">
+      <div class="group-head">
+        <h3>Moods</h3>
+        <button class="mini" id="surpriseBtn" title="Surprise me">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3h5v5M21 3l-7 7M8 21H3v-5M3 21l7-7M21 16v5h-5M14 14l7 7M3 8V3h5M10 10L3 3"/></svg>
+          surprise
+        </button>
+      </div>
+      <div class="pills" id="moods">
+        <button data-mood="calm">Calm</button>
+        <button data-mood="storm">Storm</button>
+        <button data-mood="bloom">Bloom</button>
+        <button data-mood="drift">Drift</button>
+      </div>
+    </section>
+
+    <section class="group">
+      <h3>Your pieces</h3>
+      <div class="gallery" id="gallery">
+        <p class="gallery-empty" id="galleryEmpty">Saved pieces appear here.</p>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button class="btn" id="pauseBtn" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true" class="ico-pause"><path d="M9 5v14M15 5v14"/></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true" class="ico-play"><path d="M7 4l13 8-13 8z"/></svg>
+        <span id="pauseLabel">Pause</span>
+      </button>
+      <button class="btn primary" id="saveBtn">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0l-4.5-4.5M12 15l4.5-4.5M4 19h16"/></svg>
+        <span>Save image</span>
+      </button>
+    </div>
+
+    <p class="foot">Everything runs in your browser. Nothing is uploaded.</p>
+  </aside>
+
+  <footer class="signature">
+    <span>NOCTURNE</span>
+    <span class="sep" aria-hidden="true">/</span>
+    <span>generative light, made to be kept</span>
+  </footer>
+
+  <div class="immersive-hint" id="immersiveHint">press <kbd>i</kbd> to return</div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
