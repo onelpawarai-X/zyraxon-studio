@@ -35,3 +35,8 @@ Open `index.html` in any modern browser, or serve the folder:
 No libraries, no build step, no network calls. One canvas, one field, plain
 HTML/CSS/JS. Particle count scales with viewport area and is capped, and the drawing
 surface holds a fixed pixel budget so the field stays smooth on phones.
+
+## একদিন ফিরব — a small choice game
+
+শূন্য থেকে পাঁচ কোটি। Six years, six decisions, four numbers at the end.
+Play it at [`ekdin-firbo/`](ekdin-firbo/) — https://onelpawarai-x.github.io/zyraxon-studio/ekdin-firbo/

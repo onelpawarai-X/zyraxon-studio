@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>একদিন ফিরব — শূন্য থেকে পাঁচ কোটি</title>
+<meta name="description" content="একটা যাত্রার গেম। শূন্য থেকে পাঁচ কোটি মানুষ পর্যন্ত। প্রতিটা সিদ্ধান্ত আপনার।">
+<style>
+  :root{
+    --bg:#08090c;
+    --panel:#0f1116;
+    --panel2:#151821;
+    --line:#232838;
+    --ink:#e8ecf4;
+    --dim:#8b93a7;
+    --gold:#f0b429;
+    --gold2:#ffd76e;
+    --green:#2fd68a;
+    --red:#ff5c6c;
+    --blue:#4f9dff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:
+      radial-gradient(1100px 600px at 50% -10%, #16203a 0%, transparent 60%),
+      radial-gradient(800px 500px at 100% 100%, #1a1225 0%, transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    font-family:"Hind Siliguri","Noto Sans Bengali","Segoe UI",system-ui,-apple-system,sans-serif;
+    min-height:100vh;
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{width:100%;max-width:760px}
+
+  .card{
+    background:linear-gradient(180deg,var(--panel2),var(--panel));
+    border:1px solid var(--line);
+    border-radius:22px;
+    padding:26px;
+    box-shadow:0 30px 80px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.04);
+  }
+
+  /* ---------- title ---------- */
+  .title{text-align:center;padding:16px 0 8px}
+  .title h1{
+    font-size:clamp(30px,7vw,46px);
+    line-height:1.15;
+    letter-spacing:-.5px;
+    background:linear-gradient(180deg,#fff,var(--gold2) 60%,var(--gold));
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;
+    margin-bottom:10px;
+  }
+  .title p{color:var(--dim);font-size:15px;line-height:1.7}
+  .title .quote{
+    margin-top:18px;padding:14px 16px;border-left:3px solid var(--gold);
+    background:rgba(240,180,41,.06);border-radius:0 12px 12px 0;
+    text-align:left;color:#d7dbe6;font-size:14.5px;line-height:1.85;font-style:italic;
+  }
+
+  /* ---------- stats ---------- */
+  .stats{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;
+  }
+  .stat{
+    background:rgba(255,255,255,.03);border:1px solid var(--line);
+    border-radius:14px;padding:12px 10px;text-align:center;
+    transition:transform .2s, border-color .2s;
+  }
+  .stat.bump{transform:translateY(-3px);border-color:rgba(240,180,41,.5)}
+  .stat .lbl{font-size:11px;color:var(--dim);margin-bottom:6px;letter-spacing:.3px}
+  .stat .val{font-size:19px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+  .stat .val.gold{color:var(--gold2)}
+  .stat .val.green{color:var(--green)}
+
+  /* ---------- progress ---------- */
+  .prog{margin-bottom:20px}
+  .prog .bar{height:9px;background:#0a0c11;border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+  .prog .fill{height:100%;width:0%;border-radius:99px;
+    background:linear-gradient(90deg,var(--gold),var(--gold2));
+    transition:width .7s cubic-bezier(.2,.9,.2,1);
+    box-shadow:0 0 18px rgba(240,180,41,.5)}
+  .prog .meta{display:flex;justify-content:space-between;font-size:12px;color:var(--dim);margin-top:8px}
+
+  /* ---------- scene ---------- */
+  .scene{min-height:190px}
+  .year{
+    display:inline-block;font-size:11.5px;letter-spacing:1.2px;text-transform:uppercase;
+    color:var(--gold);background:rgba(240,180,41,.1);border:1px solid rgba(240,180,41,.28);
+    padding:5px 12px;border-radius:99px;margin-bottom:14px;
+  }
+  .scene h2{font-size:clamp(20px,4.6vw,26px);line-height:1.4;margin-bottom:12px;font-weight:700}
+  .scene p{color:#c2c9d8;font-size:15.5px;line-height:1.85;margin-bottom:10px}
+  .scene p.hint{color:var(--dim);font-size:13.5px;font-style:italic}
+
+  /* ---------- choices ---------- */
+  .choices{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+  .choice{
+    text-align:left;width:100%;cursor:pointer;
+    background:rgba(255,255,255,.035);
+    border:1px solid var(--line);
+    border-radius:15px;
+    padding:15px 17px;
+    color:var(--ink);
+    font-family:inherit;font-size:15px;line-height:1.6;
+    transition:all .18s ease;
+    display:flex;gap:12px;align-items:flex-start;
+  }
+  .choice:hover{
+    background:rgba(240,180,41,.09);
+    border-color:rgba(240,180,41,.55);
+    transform:translateX(4px);
+  }
+  .choice:active{transform:translateX(2px) scale(.995)}
+  .choice .k{
+    flex:0 0 24px;height:24px;border-radius:8px;
+    background:rgba(240,180,41,.15);color:var(--gold);
+    font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;
+    margin-top:1px;
+  }
+  .choice .tx{flex:1}
+  .choice .tx small{display:block;color:var(--dim);font-size:12.5px;margin-top:4px;line-height:1.6}
+
+  /* ---------- effects ---------- */
+  .fx{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .chip{
+    font-size:12.5px;padding:5px 11px;border-radius:99px;
+    border:1px solid var(--line);background:rgba(255,255,255,.03);color:#cfd6e4;
+    animation:pop .35s ease both;
+  }
+  .chip.up{border-color:rgba(47,214,138,.45);background:rgba(47,214,138,.1);color:var(--green)}
+  .chip.down{border-color:rgba(255,92,108,.45);background:rgba(255,92,108,.1);color:var(--red)}
+  @keyframes pop{from{opacity:0;transform:translateY(6px) scale(.96)}to{opacity:1;transform:none}}
+
+  /* ---------- buttons ---------- */
+  .btn{
+    cursor:pointer;font-family:inherit;font-size:15.5px;font-weight:700;
+    padding:15px 26px;border-radius:14px;border:none;
+    background:linear-gradient(180deg,var(--gold2),var(--gold));
+    color:#141005;width:100%;margin-top:20px;
+    transition:transform .15s, box-shadow .2s;
+    box-shadow:0 10px 30px rgba(240,180,41,.22);
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 14px 38px rgba(240,180,41,.32)}
+  .btn:active{transform:translateY(0)}
+  .btn.ghost{
+    background:transparent;border:1px solid var(--line);color:var(--ink);
+    box-shadow:none;margin-top:10px;font-weight:600;
+  }
+  .btn.ghost:hover{background:rgba(255,255,255,.04);box-shadow:none}
+
+  /* ---------- ending ---------- */
+  .ending .big{
+    font-size:clamp(26px,6vw,38px);font-weight:800;line-height:1.3;margin:6px 0 16px;
+    background:linear-gradient(180deg,#fff,var(--gold2));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  .ending .finalquote{
+    margin-top:20px;padding:20px;border-radius:16px;
+    background:linear-gradient(180deg,rgba(240,180,41,.09),rgba(240,180,41,.02));
+    border:1px solid rgba(240,180,41,.28);
+    font-size:16px;line-height:2;color:#f0e6cf;font-style:italic;
+  }
+
+  /* ---------- log ---------- */
+  .log{margin-top:18px}
+  .log summary{
+    cursor:pointer;color:var(--dim);font-size:13px;padding:10px 0;
+    list-style:none;user-select:none;
+  }
+  .log summary::-webkit-details-marker{display:none}
+  .log summary:before{content:"▸ ";color:var(--gold)}
+  .log[open] summary:before{content:"▾ "}
+  .log ol{margin:6px 0 0 0;padding-left:20px;color:var(--dim);font-size:13px;line-height:1.9}
+  .log li{margin-bottom:6px}
+  .log li b{color:#cfd6e4;font-weight:600}
+
+  .hidden{display:none !important}
+
+  @media (max-width:560px){
+    .card{padding:20px;border-radius:18px}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .stat .val{font-size:17px}
+    body{padding:12px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ INTRO ============ -->
+  <div class="card" id="intro">
+    <div class="title">
+      <h1>একদিন ফিরব</h1>
+      <p>শূন্য থেকে পাঁচ কোটি মানুষ পর্যন্ত।<br>প্রতিটা সিদ্ধান্ত আপনার — আর প্রতিটা সিদ্ধান্তের দাম আছে।</p>
+      <div class="quote">
+        "একদিন এমনভাবে হারিয়ে যাব, কেউ খুঁজে পাবে না।<br>
+        আবার এমনভাবে ফিরব, কেউ ভুলতে পারবে না।"
+      </div>
+    </div>
+    <button class="btn" id="startBtn">যাত্রা শুরু করি</button>
+    <button class="btn ghost" id="howBtn">কীভাবে খেলব?</button>
+    <p id="best" class="hidden" style="text-align:center;color:var(--dim);font-size:13.5px;margin-top:14px"></p>
+    <div id="how" class="hidden" style="margin-top:18px">
+      <p style="color:#c2c9d8;font-size:14.5px;line-height:1.9">
+        ছয় বছর। ছয়টা সিদ্ধান্তের ধাপ। প্রতিটা ধাপে দুই-তিনটা পথ — কোনটা বেছে নেবেন সেটা আপনার।
+        <br><br>
+        <b style="color:var(--gold2)">টাকা</b> — হাতে থাকা পুঁজি। <b style="color:var(--gold2)">টিম</b> — পাশে থাকা মানুষ।
+        <b style="color:var(--gold2)">মানুষ</b> — রোজ যারা ব্যবহার করে। <b style="color:var(--gold2)">বিশ্বাস</b> — সবচেয়ে দুষ্প্রাপ্য জিনিস।
+        <br><br>
+        টাকা দিয়ে অনেক কিছু কেনা যায়। কিন্তু <b style="color:var(--gold2)">বিশ্বাস একবার ভাঙলে আর ফেরে না</b> — আর শেষে যেটা গণনা হয়, সেটাই।
+      </p>
+    </div>
+  </div>
+
+  <!-- ============ GAME ============ -->
+  <div class="card hidden" id="game">
+    <div class="stats">
+      <div class="stat" id="s-money"><div class="lbl">টাকা</div><div class="val gold" id="v-money">৳০</div></div>
+      <div class="stat" id="s-team"><div class="lbl">টিম</div><div class="val" id="v-team">১ জন</div></div>
+      <div class="stat" id="s-users"><div class="lbl">মানুষ</div><div class="val" id="v-users">০</div></div>
+      <div class="stat" id="s-trust"><div class="lbl">বিশ্বাস</div><div class="val green" id="v-trust">১০০%</div></div>
+    </div>
+
+    <div class="prog">
+      <div class="bar"><div class="fill" id="progFill"></div></div>
+      <div class="meta"><span id="progLabel">বছর ১ / ৬</span><span id="progPct">০%</span></div>
+    </div>
+
+    <div class="scene" id="scene"></div>
+    <div class="choices" id="choices"></div>
+    <div class="fx" id="fx"></div>
+  </div>
+
+  <!-- ============ ENDING ============ -->
+  <div class="card hidden" id="ending"></div>
+
+</div>
+
+<script>
+/* ============================================================
+   একদিন ফিরব — a small choice game
+   Numbers mirror docs/৩-পুরো-যাত্রা.md §১৬ and §২২ (Scenario B)
+   ============================================================ */
+
+const STATE = { money:0, team:1, users:0, trust:100, log:[] };
+
+const bn = n => String(n).replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+const money = n => {
+  if (n >= 10000000) return '৳' + bn((n/10000000).toFixed(n>=100000000?0:1)) + ' কোটি';
+  if (n >= 100000)   return '৳' + bn((n/100000).toFixed(1)) + ' লাখ';
+  if (n >= 1000)     return '৳' + bn(Math.round(n/1000)) + ' হাজার';
+  return '৳' + bn(n);
+};
+const people = n => {
+  if (n >= 10000000) return bn((n/10000000).toFixed(1).replace('.0','')) + ' কোটি';
+  if (n >= 100000)   return bn((n/100000).toFixed(1).replace('.0','')) + ' লাখ';
+  if (n >= 1000)     return bn((n/1000).toFixed(0)) + ' হাজার';
+  return bn(n);
+};
+
+/* ---------- chapters ---------- */
+const CHAPTERS = [
+  {
+    year:'বছর ১ · শুরু',
+    title:'হাতে সাত লাখ সাতানব্বই হাজার টাকা। পাঁচটা GPU। একটা ঘর।',
+    body:'কেউ নেই পাশে। কেউ বিশ্বাস করে না। শুধু একটা সিস্টেম আছে — কাজ করে, কিন্তু কেউ জানে না। প্রথম সিদ্ধান্তটা সবচেয়ে কঠিন: টাকাটা কোথায় ঢালবেন?',
+    hint:'মনে রাখবেন — প্রথম বছরে দেখানো মানে চাওয়া মানুষ এসে পড়বে।',
+    choices:[
+      { t:'সব টাকা সার্ভারে ঢালি, চুপচাপ কাজ করি',
+        s:'বাইরে কিছু না দেখিয়ে সিস্টেম শক্ত করি। ধীর, কিন্তু নিরাপদ।',
+        fx:{ money:10000000, team:4, users:100000, trust:8 } },
+      { t:'অর্ধেক সার্ভারে, অর্ধেক প্রচারে',
+        s:'দ্রুত মানুষ আনব, কিন্তু সিস্টেম দুর্বল থাকবে।',
+        fx:{ money:10000000, team:3, users:300000, trust:-12 } },
+      { t:'ঋণ নিয়ে আরও বড় করি',
+        s:'বড় লাফ। কিন্তু ঋণ কখনো সম্মান দেয় না, শুধু ভয় দেয়।',
+        fx:{ money:10000000, team:5, users:150000, trust:-25 } },
+    ]
+  },
+  {
+    year:'বছর ২ · পাঁচ লাখ মানুষ',
+    title:'মানুষ আসছে। টাকা আসছে। আর সাথে আসছে চাওয়া মানুষ।',
+    body:'এক পরিচিত ফোন করে — "ভাই, একটু ধার দরকার।" আরেকজন বলে — "তোমার কোম্পানিতে চাকরি দে।" টিম ১৫ জন। প্রথমবার মনে হচ্ছে — হয়তো হয়ে যাচ্ছে।',
+    hint:'এখানেই ঠিক হয় কে সত্যি, কে মিথ্যা।',
+    choices:[
+      { t:'সবাইকে ফিরিয়ে দিই ভদ্রভাবে, কাজ চালিয়ে যাই',
+        s:'কষ্ট হবে। কিন্তু কোম্পানির টাকা কোম্পানির থাকবে।',
+        fx:{ money:141600000, team:10, users:500000, trust:10 } },
+      { t:'যে চায় তাকে দিই — টাকা তো আসছে',
+        s:'সবাই খুশি। কিন্তু টাকা শেষ হলে কেউ থাকবে না।',
+        fx:{ money:141600000, team:20, users:450000, trust:-20 } },
+      { t:'যারা প্রথম থেকে ছিল, শুধু তাদের পাশে থাকি',
+        s:'পাঁচজনকে টিম লিড বানাই। বাকিরা বুঝবে।',
+        fx:{ money:141600000, team:15, users:520000, trust:18 } },
+    ]
+  },
+  {
+    year:'বছর ৩ · এক কোটি মানুষ',
+    title:'দেশের ছয় শতাংশ মানুষ রোজ ব্যবহার করে। মন্ত্রীরা ফোন করেন।',
+    body:'পঞ্চাশ জনের টিম। দুইটা ডেটা সেন্টার। পত্রিকা লেখে — "বাংলাদেশের AI বিপ্লব"। এখন সিদ্ধান্ত: টাকা কোথায় যাবে — নিজের বাড়িতে, নাকি নিজের মডেলে?',
+    hint:'বাড়ি আর গাড়ি বাড়ে ধীরে। যে জিনিস দ্রুত বাড়ে — সেটা মানুষ।',
+    choices:[
+      { t:'নিজের বাংলা মডেল ট্রেইন করি',
+        s:'খরচ বড়, কিন্তু ভবিষ্যৎ নিজের হাতে।',
+        fx:{ money:3120000000, team:35, users:10000000, trust:15 } },
+      { t:'বড় বাড়ি আর গাড়ি কিনি',
+        s:'সবাই দেখবে। কিন্তু এটা কোম্পানির টাকা।',
+        fx:{ money:3120000000, team:25, users:9000000, trust:-18 } },
+      { t:'সব টাকা কোম্পানিতেই রাখি',
+        s:'কিছুই দেখাব না। কিন্তু টিম ভাববে আপনি বদলে যাননি।',
+        fx:{ money:3120000000, team:50, users:10000000, trust:22 } },
+    ]
+  },
+  {
+    year:'বছর ৪ · দুই কোটি মানুষ',
+    title:'ত্রিশ দেশে সেবা। আন্তর্জাতিক বিনিয়োগকারী এসেছে।',
+    body:'একটা বড় কোম্পানি কিনতে চায় — অনেক টাকা দিয়ে। আরেকটা পথ: নিজেরাই থেকে যাই, বিশ্ব জয় করি। টিম এখন ২৫০ জন। সিদ্ধান্তটা শুধু আপনার।',
+    hint:'টাকা দিয়ে কেনা যায় না এমন জিনিস — নিজের সিদ্ধান্ত।',
+    choices:[
+      { t:'বিক্রি করি না। নিজেরাই থেকে যাই।',
+        s:'কঠিন পথ। কিন্তু এটা আপনার গল্প।',
+        fx:{ money:9080000000, team:200, users:20000000, trust:20 } },
+      { t:'আংশিক শেয়ার বিক্রি করি',
+        s:'টাকা আসবে, কিন্তু সিদ্ধান্ত ভাগ হবে।',
+        fx:{ money:34410000000, team:220, users:18000000, trust:-5 } },
+      { t:'পুরোটা বিক্রি করে দিই',
+        s:'অনেক টাকা। কিন্তু গল্পটা এখানেই শেষ।',
+        fx:{ money:9080000000, team:0, users:0, trust:-60, end:'sold' } },
+    ]
+  },
+  {
+    year:'বছর ৫ · সাড়ে তিন কোটি মানুষ',
+    title:'একশো দেশ। তিনটা ডেটা সেন্টার। তিনশো পঞ্চাশ জন মানুষ আপনার উপর নির্ভর করে।',
+    body:'আপনি এখন সিদ্ধান্ত নেন, কাজ করেন না। প্রথম পাঁচজন — যারা শূন্য থেকে ছিল — এখন VP। কিন্তু একটা প্রশ্ন আসে: আপনি কি এখনো সেই মানুষ?',
+    hint:'তিনশো পঞ্চাশ জন একা সামলানো যায় না।',
+    choices:[
+      { t:'প্রথম পাঁচজনকে আরও দায়িত্ব দিই',
+        s:'ওরাই আপনাকে সবচেয়ে ভালো চেনে। ওরাই সামলাবে।',
+        fx:{ money:19510000000, team:300, users:35000000, trust:25 } },
+      { t:'সব নিজে সামলাতে চাই',
+        s:'নিয়ন্ত্রণ থাকবে, কিন্তু টিম ভাঙবে।',
+        fx:{ money:19510000000, team:200, users:30000000, trust:-30 } },
+      { t:'নিজে বিশ্রাম নিই, টিমকে ছেড়ে দিই',
+        s:'ভারসাম্য। বছর পাঁচে ঘুমটাও দরকার।',
+        fx:{ money:19510000000, team:350, users:34000000, trust:12 } },
+    ]
+  },
+  {
+    year:'বছর ৬ · পাঁচ কোটি মানুষ',
+    title:'IPO-র প্রস্তুতি। বিশ্ব এখন নাম জানে।',
+    body:'পাঁচ কোটি মানুষ রোজ ব্যবহার করে। পাঁচশো জন টিম। একটা প্রশ্ন বাকি — শূন্য থেকে এত দূর এসে, এখন কী করবেন?',
+    hint:'শেষ সিদ্ধান্তটা টাকা নিয়ে নয় — মানুষ নিয়ে।',
+    choices:[
+      { t:'IPO করি, নিজের ডেটা সেন্টার বানাই',
+        s:'বড় প্রতিষ্ঠান। কিন্তু এখনো আপনি নিজেই।',
+        fx:{ money:34410000000, team:450, users:50000000, trust:15 } },
+      { t:'ফাউন্ডেশনের মাধ্যমে বাংলা ভাষার জন্য কাজ করি',
+        s:'টাকা কম, কিন্তু ১৩ কোটি মানুষের জন্য কিছু থাকবে।',
+        fx:{ money:34410000000, team:400, users:48000000, trust:35 } },
+      { t:'সব বিক্রি করে চুপচাপ চলে যাই',
+        s:'টাকা অনেক। কিন্তু গল্পটা অসম্পূর্ণ।',
+        fx:{ money:34410000000, team:0, users:0, trust:-50, end:'gone' } },
+    ]
+  }
+];
+
+/* ---------- dom ---------- */
+const $ = id => document.getElementById(id);
+const introEl = $('intro'), gameEl = $('game'), endingEl = $('ending');
+let step = 0;
+
+$('howBtn').onclick = () => $('how').classList.toggle('hidden');
+$('startBtn').onclick = () => {
+  introEl.classList.add('hidden');
+  gameEl.classList.remove('hidden');
+  step = 0;
+  render();
+};
+
+function bump(id){
+  const el = $(id);
+  el.classList.add('bump');
+  setTimeout(()=>el.classList.remove('bump'), 240);
+}
+
+function paintStats(){
+  $('v-money').textContent = money(STATE.money);
+  $('v-team').textContent  = bn(STATE.team) + (STATE.team>1?' জন':' জন');
+  $('v-users').textContent = people(STATE.users);
+  $('v-trust').textContent = bn(STATE.trust) + '%';
+  $('v-trust').className = 'val ' + (STATE.trust>=60?'green':STATE.trust>=30?'gold':'');
+  if (STATE.trust < 30) $('v-trust').style.color = 'var(--red)';
+  else $('v-trust').style.color = '';
+}
+
+function paintProgress(){
+  const pct = Math.round(step / CHAPTERS.length * 100);
+  $('progFill').style.width = pct + '%';
+  $('progLabel').textContent = 'ধাপ ' + bn(step+1) + ' / ' + bn(CHAPTERS.length);
+  $('progPct').textContent = bn(pct) + '%';
+}
+
+function render(){
+  const c = CHAPTERS[step];
+  if (!c) return finish();
+
+  $('scene').innerHTML =
+    `<div class="year">${c.year}</div>
+     <h2>${c.title}</h2>
+     <p>${c.body}</p>
+     <p class="hint">${c.hint}</p>`;
+
+  $('fx').innerHTML = '';
+  const box = $('choices');
+  box.innerHTML = '';
+  c.choices.forEach((ch, i) => {
+    const b = document.createElement('button');
+    b.className = 'choice';
+    b.innerHTML = `<span class="k">${bn(i+1)}</span><span class="tx">${ch.t}<small>${ch.s}</small></span>`;
+    b.onclick = () => choose(ch);
+    box.appendChild(b);
+  });
+
+  paintStats();
+  paintProgress();
+  gameEl.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function choose(ch){
+  const f = ch.fx || {};
+  STATE.log.push({ year: CHAPTERS[step].year, choice: ch.t });
+
+  const before = STATE.money;
+  STATE.prevTeam = STATE.team;
+
+  if (f.money !== undefined) STATE.money = Math.max(0, f.money);
+  if (f.team  !== undefined) STATE.team  = Math.max(0, f.team);
+  if (f.users !== undefined) STATE.users = Math.max(0, f.users);
+  if (f.trust !== undefined) STATE.trust = Math.max(0, Math.min(100, STATE.trust + f.trust));
+
+  paintStats();
+  bump('s-money'); bump('s-team'); bump('s-users'); bump('s-trust');
+
+  const delta = STATE.money - before;
+  const chips = [];
+  if (delta) chips.push({t:'টাকা ' + (delta>0?'+':'') + money(delta), d:delta>0?'up':'down'});
+  if (f.team)  chips.push({t:'টিম ' + bn(f.team) + ' জন', d:'up'});
+  if (f.users) chips.push({t:'মানুষ ' + people(f.users), d:'up'});
+  if (f.trust) chips.push({t:'বিশ্বাস ' + (f.trust>0?'+':'') + bn(f.trust) + '%', d:f.trust>0?'up':'down'});
+
+  $('fx').innerHTML = chips.map(c => `<span class="chip ${c.d}">${c.t}</span>`).join('');
+
+  if (f.end) { setTimeout(()=>finish(f.end), 700); return; }
+
+  $('choices').innerHTML = '';
+  const next = document.createElement('button');
+  next.className = 'btn';
+  next.textContent = 'এগিয়ে যাই →';
+  next.onclick = () => { step++; render(); };
+  $('choices').appendChild(next);
+}
+
+/* ---------- ending ---------- */
+function finish(mode){
+  gameEl.classList.add('hidden');
+  endingEl.classList.remove('hidden');
+
+  if (mode === 'sold' || mode === 'gone') {
+    endingEl.innerHTML = `
+      <div class="ending">
+        <div class="year">শেষ</div>
+        <div class="big">টাকা এসেছে।<br>গল্পটা থেমে গেছে।</div>
+        <p style="color:#c2c9d8;font-size:15.5px;line-height:1.9">
+          আপনি অনেক টাকা পেয়েছেন — ${money(STATE.money)}। কিন্তু যে সিস্টেম বানাতে ছয় বছর লাগিয়েছিলেন,
+          সেটা এখন আর আপনার নয়। যে ${bn(STATE.prevTeam||0)} জন আপনার উপর নির্ভর করত, তারা অন্য কারো হয়ে গেল।
+        </p>
+        <div class="finalquote">
+          "টাকা আসুক। কিন্তু আপনি একই মানুষ থাকুন।"
+        </div>
+        <button class="btn" onclick="restart()">আবার শুরু করি</button>
+      </div>`;
+    return;
+  }
+
+  saveBest();
+  const t = STATE.trust;
+  const grade =
+    t >= 85 ? { g:'A+', t:'যে মানুষ নিজেকে খুঁজতে বের হয়, সে ফিরে এসে সবাইকে চিনতে পারে।', c:'#2fd68a' } :
+    t >= 65 ? { g:'A',  t:'আপনি টাকা পেয়েছেন — আর নিজেকেও হারাননি। এটাই সবচেয়ে কঠিন।', c:'#f0b429' } :
+    t >= 45 ? { g:'B',  t:'পথটা কঠিন ছিল। কিছু জায়গায় ভুল হয়েছে — কিন্তু থামেননি।', c:'#4f9dff' } :
+              { g:'C',  t:'টাকা এসেছে। কিন্তু যারা প্রথমে ছিল, তারা আর নেই।', c:'#ff5c6c' };
+
+  endingEl.innerHTML = `
+    <div class="ending">
+      <div class="year">ছয় বছর পরে</div>
+      <div class="big">${people(STATE.users)} মানুষ।<br>${bn(STATE.team)} জন টিম।<br>বিশ্বাস ${bn(t)}%।</div>
+
+      <div class="stats" style="margin-top:20px">
+        <div class="stat"><div class="lbl">টাকা</div><div class="val gold">${money(STATE.money)}</div></div>
+        <div class="stat"><div class="lbl">টিম</div><div class="val">${bn(STATE.team)} জন</div></div>
+        <div class="stat"><div class="lbl">মানুষ</div><div class="val">${people(STATE.users)}</div></div>
+        <div class="stat"><div class="lbl">বিশ্বাস</div><div class="val" style="color:${grade.c}">${bn(t)}%</div></div>
+      </div>
+
+      <p style="color:#c2c9d8;font-size:15.5px;line-height:1.9;margin-top:20px">
+        <b style="color:${grade.c};font-size:20px">${grade.g}</b> — ${grade.t}
+      </p>
+
+      <div class="finalquote">
+        "একদিন এমনভাবে হারিয়ে যাব, কেউ খুঁজে পাবে না।<br>
+        আবার এমনভাবে ফিরব, কেউ ভুলতে পারবে না।"
+      </div>
+
+      <p style="color:var(--dim);font-size:13.5px;line-height:1.8;margin-top:16px">
+        বছর ৫-এ ${bn(STATE.team)} জন মানুষ আপনার উপর নির্ভর করবে।<br>
+        এটা প্রতিশোধ নয় — <b style="color:var(--gold2)">এটা দায়িত্ব।</b>
+      </p>
+
+      <details class="log">
+        <summary>আপনার সিদ্ধান্তগুলো দেখি</summary>
+        <ol>${STATE.log.map(l=>`<li><b>${l.year}</b> — ${l.choice}</li>`).join('')}</ol>
+      </details>
+
+      <button class="btn" onclick="restart()">আবার খেলি</button>
+      <button class="btn ghost" onclick="shareIt()">ফলাফল কপি করি</button>
+    </div>`;
+
+  window.__share = `একদিন ফিরব — ${money(STATE.money)}, ${bn(STATE.team)} জন টিম, ${people(STATE.users)} মানুষ, বিশ্বাস ${bn(t)}%। গ্রেড ${grade.g}।`;
+}
+
+function restart(){
+  STATE.money=0; STATE.team=1; STATE.users=0; STATE.trust=100; STATE.log=[];
+  step = 0;
+  endingEl.classList.add('hidden');
+  gameEl.classList.remove('hidden');
+  render();
+}
+
+function shareIt(){
+  const txt = window.__share || 'একদিন ফিরব';
+  navigator.clipboard?.writeText(txt).then(
+    ()=>{ const b=event.target; const o=b.textContent; b.textContent='কপি হয়েছে ✓'; setTimeout(()=>b.textContent=o,1400); },
+    ()=>{}
+  );
+}
+
+/* ---------- keyboard ---------- */
+document.addEventListener('keydown', e => {
+  if (gameEl.classList.contains('hidden')) {
+    if (e.key === 'Enter' && !introEl.classList.contains('hidden')) $('startBtn').click();
+    return;
+  }
+  const k = '১২৩'.indexOf(e.key) + 1 || Number(e.key);
+  if (k >= 1 && k <= 3) {
+    const c = document.querySelectorAll('.choice')[k-1];
+    if (c) c.click();
+  }
+  if (e.key === 'Enter') {
+    const n = document.querySelector('#choices .btn');
+    if (n) n.click();
+  }
+});
+
+/* ---------- best score ---------- */
+const BEST_KEY = 'ekdin-firbo-best';
+function saveBest(){
+  try{
+    const cur = { trust: STATE.trust, users: STATE.users, team: STATE.team, money: STATE.money };
+    const prev = JSON.parse(localStorage.getItem(BEST_KEY) || 'null');
+    if (!prev || cur.trust > prev.trust || (cur.trust === prev.trust && cur.users > prev.users))
+      localStorage.setItem(BEST_KEY, JSON.stringify(cur));
+  }catch(_){}
+}
+function showBest(){
+  try{
+    const b = JSON.parse(localStorage.getItem(BEST_KEY) || 'null');
+    if (!b) return;
+    const el = $('best');
+    el.textContent = 'আপনার সেরা: ' + people(b.users) + ' মানুষ · বিশ্বাস ' + bn(b.trust) + '%';
+    el.classList.remove('hidden');
+  }catch(_){}
+}
+
+paintStats();
+showBest();
+</script>
+</body>
+</html>
